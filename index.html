@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shark Fish Challenge</title>
+    <title>Sharkie-Run</title>
     <style>
         * {
             margin: 0;
@@ -23,74 +23,236 @@
             height: 100vh;
         }
 
-        #ui {
+        #title {
             position: absolute;
             top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.8),
+                0 0 20px rgba(255, 215, 0, 0.6),
+                3px 3px 6px rgba(0, 0, 0, 0.8),
+                0 4px 8px rgba(0, 0, 0, 0.6);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        @keyframes titleGlow {
+            from {
+                text-shadow: 
+                    0 0 10px rgba(255, 215, 0, 0.8),
+                    0 0 20px rgba(255, 215, 0, 0.6),
+                    3px 3px 6px rgba(0, 0, 0, 0.8);
+            }
+            to {
+                text-shadow: 
+                    0 0 20px rgba(255, 215, 0, 1),
+                    0 0 30px rgba(255, 215, 0, 0.8),
+                    3px 3px 6px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        #ui {
+            position: absolute;
+            top: 100px;
             left: 20px;
             z-index: 100;
-            color: white;
-            font-size: 24px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .ui-card {
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.9) 0%, rgba(42, 82, 152, 0.9) 100%);
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 
+                0 8px 16px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(255, 215, 0, 0.2),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transform: perspective(1000px) rotateX(5deg);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .ui-card:hover {
+            transform: perspective(1000px) rotateX(0deg) translateY(-5px);
+            box-shadow: 
+                0 12px 24px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(255, 215, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+        }
+
+        .ui-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         #score {
             font-weight: bold;
+            font-size: 32px;
             color: #ffd700;
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.8),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            display: inline-block;
+            animation: scorePulse 0.5s ease-in-out;
+        }
+
+        @keyframes scorePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        #difficulty {
+            font-size: 20px;
+            color: #ff6b6b;
+            font-weight: bold;
+            text-shadow: 
+                0 0 10px rgba(255, 107, 107, 0.6),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         #gameOver {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 40px;
-            border-radius: 20px;
+            transform: translate(-50%, -50%) perspective(1000px) rotateX(10deg);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 40, 0.95) 100%);
+            padding: 50px 60px;
+            border-radius: 25px;
             text-align: center;
             z-index: 200;
             display: none;
             color: white;
             border: 3px solid #ffd700;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.8),
+                0 0 40px rgba(255, 215, 0, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            animation: gameOverAppear 0.5s ease-out;
+        }
+
+        @keyframes gameOverAppear {
+            from {
+                transform: translate(-50%, -50%) perspective(1000px) rotateX(90deg) scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%) perspective(1000px) rotateX(10deg) scale(1);
+                opacity: 1;
+            }
         }
 
         #gameOver h1 {
-            font-size: 48px;
+            font-size: 56px;
             margin-bottom: 20px;
             color: #ffd700;
+            text-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.8),
+                0 0 40px rgba(255, 215, 0, 0.6),
+                3px 3px 6px rgba(0, 0, 0, 0.8);
+            letter-spacing: 3px;
+            text-transform: uppercase;
         }
 
         #finalScore {
-            font-size: 36px;
-            margin: 20px 0;
+            font-size: 48px;
+            margin: 30px 0;
             color: #4ade80;
+            font-weight: bold;
+            text-shadow: 
+                0 0 15px rgba(74, 222, 128, 0.8),
+                2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: scoreGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes scoreGlow {
+            from {
+                text-shadow: 
+                    0 0 15px rgba(74, 222, 128, 0.8),
+                    2px 2px 4px rgba(0, 0, 0, 0.8);
+            }
+            to {
+                text-shadow: 
+                    0 0 25px rgba(74, 222, 128, 1),
+                    0 0 35px rgba(74, 222, 128, 0.8),
+                    2px 2px 4px rgba(0, 0, 0, 0.8);
+            }
         }
 
         #restartBtn {
-            margin-top: 20px;
-            padding: 15px 30px;
-            font-size: 20px;
-            background: #4ade80;
+            margin-top: 30px;
+            padding: 18px 40px;
+            font-size: 22px;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 15px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(74, 222, 128, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            transform: perspective(1000px) rotateX(5deg);
         }
 
         #restartBtn:hover {
-            background: #22c55e;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            transform: perspective(1000px) rotateX(0deg) translateY(-3px);
+            box-shadow: 
+                0 8px 16px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(74, 222, 128, 0.6),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        #restartBtn:active {
+            transform: perspective(1000px) rotateX(0deg) translateY(0px);
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.3),
+                0 0 15px rgba(74, 222, 128, 0.4);
         }
 
         #instructions {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             color: white;
             text-align: center;
             z-index: 100;
             font-size: 16px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.8) 0%, rgba(42, 82, 152, 0.8) 100%);
+            padding: 15px 30px;
+            border-radius: 15px;
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(255, 255, 255, 0.1),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            line-height: 1.6;
         }
 
         #difficulty {
@@ -102,9 +264,16 @@
 </head>
 <body>
     <div id="gameContainer">
+        <div id="title">Sharkie-Run</div>
         <div id="ui">
-            <div>Score: <span id="score">0</span></div>
-            <div id="difficulty">Difficulty: 1</div>
+            <div class="ui-card">
+                <div class="ui-label">Score</div>
+                <div><span id="score">0</span></div>
+            </div>
+            <div class="ui-card">
+                <div class="ui-label">Difficulty</div>
+                <div id="difficulty">1</div>
+            </div>
         </div>
         <div id="instructions">
             Use ARROW KEYS or WASD to move the shark<br>
@@ -141,18 +310,95 @@
         let difficulty = 1;
         let gameStartTime = Date.now();
         let keys = {};
+        let audioContext;
+
+        // Initialize audio context
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Resume audio context on first user interaction (required by some browsers)
+                const resumeAudio = () => {
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume();
+                    }
+                    document.removeEventListener('click', resumeAudio);
+                    document.removeEventListener('keydown', resumeAudio);
+                };
+                document.addEventListener('click', resumeAudio);
+                document.addEventListener('keydown', resumeAudio);
+            } catch (e) {
+                console.warn('Web Audio API not supported');
+            }
+        }
+
+        // Sound effect functions
+        function playEatSound() {
+            if (!audioContext || audioContext.state === 'suspended') {
+                audioContext?.resume();
+                return;
+            }
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 400;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (e) {
+                // Silently fail if audio can't play
+            }
+        }
+
+        function playHitSound() {
+            if (!audioContext || audioContext.state === 'suspended') {
+                audioContext?.resume();
+                return;
+            }
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 150;
+                oscillator.type = 'sawtooth';
+                
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                // Silently fail if audio can't play
+            }
+        }
 
         // Initialize game
         function init() {
+            // Initialize audio
+            initAudio();
+            
             // Scene setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x1e3c72);
             scene.fog = new THREE.Fog(0x1e3c72, 10, 100);
 
-            // Camera
+            // Camera - Top down view
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 8, 20);
+            camera.position.set(0, 30, 0);
             camera.lookAt(0, 0, 0);
+            camera.rotation.x = -Math.PI / 2;
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -160,25 +406,38 @@
             renderer.shadowMap.enabled = true;
             document.getElementById('gameContainer').appendChild(renderer.domElement);
 
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            // Lighting - Top down lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(10, 10, 5);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            directionalLight.position.set(0, 20, 0);
             directionalLight.castShadow = true;
             scene.add(directionalLight);
 
-            // Water plane
+            // Water plane with sea texture (visible from top down)
             const waterGeometry = new THREE.PlaneGeometry(200, 200);
+            
+            // Load sea texture - single image covering entire background
+            const textureLoader = new THREE.TextureLoader();
+            const seaTexture = textureLoader.load('./sea.jpg', (texture) => {
+                // No repeat - single image covers entire plane
+                texture.wrapS = THREE.ClampToEdgeWrapping;
+                texture.wrapT = THREE.ClampToEdgeWrapping;
+                texture.repeat.set(1, 1); // Single image, no repeat
+                texture.anisotropy = 16; // Better texture quality
+            });
+            
             const waterMaterial = new THREE.MeshStandardMaterial({
-                color: 0x2a5298,
-                transparent: true,
-                opacity: 0.8
+                map: seaTexture,
+                color: 0xffffff, // White to show texture colors properly
+                transparent: false,
+                roughness: 0.8,
+                metalness: 0.1
             });
             const water = new THREE.Mesh(waterGeometry, waterMaterial);
             water.rotation.x = -Math.PI / 2;
-            water.position.y = -2;
+            water.position.y = 0;
             scene.add(water);
 
             // Load shark model
@@ -187,6 +446,7 @@
                 shark = gltf.scene;
                 shark.scale.set(2.0, 2.0, 2.0);
                 shark.position.set(0, 0, 0);
+                shark.rotation.x = -Math.PI / 2; // Rotate for top-down view
                 scene.add(shark);
 
                 // Start game
@@ -226,20 +486,71 @@
             const sharkGeometry = new THREE.ConeGeometry(2, 6, 8);
             const sharkMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
             shark = new THREE.Mesh(sharkGeometry, sharkMaterial);
-            shark.rotation.z = Math.PI / 2;
+            shark.rotation.x = -Math.PI / 2; // Rotate for top-down view
             shark.scale.set(2.0, 2.0, 2.0);
+            shark.position.set(0, 0, 0);
             scene.add(shark);
         }
 
         function spawnFish() {
             if (gameOver) return;
 
-            // Create a more accurate fish shape (oval body with tail)
+            // Load fish model
+            const loader = new GLTFLoader();
+            loader.load('./3d model/fish.glb', (gltf) => {
+                if (gameOver) return; // Check again after async load
+                
+                const fishMesh = gltf.scene.clone();
+                
+                // Scale the fish much bigger
+                fishMesh.scale.set(2.5, 2.5, 2.5);
+                
+                // Rotate for top-down view
+                fishMesh.rotation.x = -Math.PI / 2;
+                
+                // Random position around the shark (same Y level)
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 20 + Math.random() * 30;
+                fishMesh.position.set(
+                    Math.cos(angle) * distance,
+                    0,
+                    Math.sin(angle) * distance
+                );
+
+                // Random movement direction (horizontal only, no vertical)
+                const randomDir = new THREE.Vector3(
+                    (Math.random() - 0.5) * 2,
+                    0,
+                    (Math.random() - 0.5) * 2
+                ).normalize();
+                
+                fishMesh.userData = { 
+                    type: 'fish', 
+                    speed: 0.15 + Math.random() * 0.1, // Much slower movement
+                    direction: randomDir,
+                    changeDirectionTime: Date.now() + 2000 + Math.random() * 3000
+                };
+                scene.add(fishMesh);
+                fish.push(fishMesh);
+            }, undefined, (error) => {
+                console.error('Error loading fish model:', error);
+                // Create a simple fish if model fails to load
+                createSimpleFish();
+            });
+
+            // Spawn next fish
+            const spawnDelay = Math.max(1000 - difficulty * 50, 300);
+            setTimeout(spawnFish, spawnDelay);
+        }
+
+        function createSimpleFish() {
+            if (gameOver) return;
+            
             const fishGroup = new THREE.Group();
             
-            // Fish body (ellipsoid)
-            const bodyGeometry = new THREE.SphereGeometry(0.4, 12, 8);
-            bodyGeometry.scale(1, 0.7, 1.5);
+            // Simple fish body
+            const bodyGeometry = new THREE.SphereGeometry(0.5, 12, 8);
+            bodyGeometry.scale(1.5, 0.1, 1);
             const bodyMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0xffd700,
                 metalness: 0.3,
@@ -248,44 +559,28 @@
             const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
             fishGroup.add(body);
             
-            // Tail fin
-            const tailGeometry = new THREE.ConeGeometry(0.3, 0.6, 4);
-            tailGeometry.scale(1, 0.3, 1);
-            const tail = new THREE.Mesh(tailGeometry, bodyMaterial);
-            tail.position.z = -0.8;
-            tail.rotation.x = Math.PI / 2;
-            fishGroup.add(tail);
-            
-            // Top fin
-            const topFinGeometry = new THREE.ConeGeometry(0.15, 0.4, 4);
-            topFinGeometry.scale(1, 0.2, 1);
-            const topFin = new THREE.Mesh(topFinGeometry, bodyMaterial);
-            topFin.position.y = 0.3;
-            topFin.position.z = -0.2;
-            topFin.rotation.x = -Math.PI / 2;
-            fishGroup.add(topFin);
-            
             const fishMesh = fishGroup;
+            fishMesh.rotation.x = -Math.PI / 2;
             
-            // Random position around the shark
+            // Random position
             const angle = Math.random() * Math.PI * 2;
             const distance = 20 + Math.random() * 30;
             fishMesh.position.set(
                 Math.cos(angle) * distance,
-                (Math.random() - 0.5) * 10,
+                0,
                 Math.sin(angle) * distance
             );
 
             // Random movement direction
             const randomDir = new THREE.Vector3(
                 (Math.random() - 0.5) * 2,
-                (Math.random() - 0.5) * 0.5,
+                0,
                 (Math.random() - 0.5) * 2
             ).normalize();
             
             fishMesh.userData = { 
                 type: 'fish', 
-                speed: 0.5 + Math.random() * 0.5,
+                speed: 0.15 + Math.random() * 0.1,
                 direction: randomDir,
                 changeDirectionTime: Date.now() + 2000 + Math.random() * 3000
             };
@@ -300,45 +595,135 @@
         function spawnBoat() {
             if (gameOver) return;
 
-            // Load ship model
-            const loader = new GLTFLoader();
-            loader.load('./3d model/ship.glb', (gltf) => {
-                if (gameOver) return; // Check again after async load
-                
-                const boatMesh = gltf.scene.clone();
-                
-                // Scale the ship appropriately
-                boatMesh.scale.set(1.5, 1.5, 1.5);
-                
-                // Random position
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 25 + Math.random() * 25;
-                boatMesh.position.set(
-                    Math.cos(angle) * distance,
-                    1,
-                    Math.sin(angle) * distance
-                );
-
-                // Random movement direction
-                const randomDir = new THREE.Vector3(
-                    (Math.random() - 0.5) * 2,
-                    0,
-                    (Math.random() - 0.5) * 2
-                ).normalize();
-                
-                boatMesh.userData = { 
-                    type: 'boat', 
-                    speed: 0.3 + difficulty * 0.1,
-                    direction: randomDir,
-                    changeDirectionTime: Date.now() + 3000 + Math.random() * 4000
-                };
-                scene.add(boatMesh);
-                boats.push(boatMesh);
-            }, undefined, (error) => {
-                console.error('Error loading ship model:', error);
-                // Create a simple boat if model fails to load
-                createSimpleBoat();
+            // Create a 3D boat model
+            const boatGroup = new THREE.Group();
+            
+            // Ship hull - realistic shape for top-down view
+            const hullShape = new THREE.Shape();
+            hullShape.moveTo(-2.5, 0);
+            hullShape.lineTo(2.0, 0);
+            hullShape.lineTo(1.5, 0.6);
+            hullShape.lineTo(-1.5, 0.6);
+            hullShape.quadraticCurveTo(-2.2, 0.3, -2.5, 0);
+            
+            const hullGeometry = new THREE.ExtrudeGeometry(hullShape, {
+                depth: 1.2,
+                bevelEnabled: true,
+                bevelThickness: 0.15,
+                bevelSize: 0.1
             });
+            hullGeometry.rotateX(-Math.PI / 2);
+            hullGeometry.rotateZ(Math.PI / 2);
+            hullGeometry.translate(0, 0, -0.6);
+            
+            const hullMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8b4513,
+                metalness: 0.2,
+                roughness: 0.7
+            });
+            const hull = new THREE.Mesh(hullGeometry, hullMaterial);
+            boatGroup.add(hull);
+            
+            // Deck
+            const deckGeometry = new THREE.BoxGeometry(4.5, 0.08, 1.2);
+            const deckMaterial = new THREE.MeshStandardMaterial({ color: 0x654321 });
+            const deck = new THREE.Mesh(deckGeometry, deckMaterial);
+            deck.position.set(-0.25, 0.7, 0);
+            boatGroup.add(deck);
+            
+            // Main cabin
+            const cabinGeometry = new THREE.BoxGeometry(1.5, 0.25, 0.9);
+            const cabinMaterial = new THREE.MeshStandardMaterial({ color: 0x654321 });
+            const cabin = new THREE.Mesh(cabinGeometry, cabinMaterial);
+            cabin.position.set(0.8, 0.85, 0);
+            boatGroup.add(cabin);
+            
+            // Cabin windows
+            const windowMaterial = new THREE.MeshStandardMaterial({ color: 0x87ceeb });
+            for (let i = 0; i < 2; i++) {
+                const window = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.15, 0.08),
+                    windowMaterial
+                );
+                window.position.set(0.5 + i * 0.6, 0.95, 0.46);
+                boatGroup.add(window);
+            }
+            
+            // Main mast (horizontal for top-down view)
+            const mastGeometry = new THREE.CylinderGeometry(0.08, 0.1, 1.0, 8);
+            const mastMaterial = new THREE.MeshStandardMaterial({ color: 0x654321 });
+            const mainMast = new THREE.Mesh(mastGeometry, mastMaterial);
+            mainMast.position.set(-0.8, 1.1, 0);
+            mainMast.rotation.x = Math.PI / 2;
+            boatGroup.add(mainMast);
+            
+            // Fore mast
+            const foreMast = new THREE.Mesh(mastGeometry, mastMaterial);
+            foreMast.scale.set(0.85, 1, 0.85);
+            foreMast.position.set(-2.0, 1.05, 0);
+            foreMast.rotation.x = Math.PI / 2;
+            boatGroup.add(foreMast);
+            
+            // Main sail (flat for top-down view)
+            const mainSailGeometry = new THREE.BoxGeometry(0.8, 0.5, 0.08);
+            const sailMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff,
+                side: THREE.DoubleSide
+            });
+            const mainSail = new THREE.Mesh(mainSailGeometry, sailMaterial);
+            mainSail.position.set(-0.8, 0.9, 0);
+            mainSail.rotation.x = Math.PI / 2;
+            boatGroup.add(mainSail);
+            
+            // Fore sail
+            const foreSail = new THREE.Mesh(mainSailGeometry, sailMaterial);
+            foreSail.scale.set(0.75, 1, 1);
+            foreSail.position.set(-2.0, 0.85, 0);
+            foreSail.rotation.x = Math.PI / 2;
+            boatGroup.add(foreSail);
+            
+            // Bowsprit
+            const bowspritGeometry = new THREE.CylinderGeometry(0.04, 0.06, 0.5, 6);
+            const bowsprit = new THREE.Mesh(bowspritGeometry, hullMaterial);
+            bowsprit.position.set(-2.5, 0.75, 0);
+            bowsprit.rotation.x = Math.PI / 2;
+            bowsprit.rotation.z = Math.PI / 6;
+            boatGroup.add(bowsprit);
+            
+            // Rudder
+            const rudderGeometry = new THREE.BoxGeometry(0.25, 0.5, 0.12);
+            const rudder = new THREE.Mesh(rudderGeometry, hullMaterial);
+            rudder.position.set(2.0, 0.6, 0);
+            boatGroup.add(rudder);
+            
+            const boatMesh = boatGroup;
+            boatMesh.rotation.x = -Math.PI / 2; // Rotate for top-down view
+            boatMesh.scale.set(0.8, 0.8, 0.8); // Ship size
+            
+            // Random position (slightly above surface)
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 25 + Math.random() * 25;
+            boatMesh.position.set(
+                Math.cos(angle) * distance,
+                0.4, // Move ship up a bit
+                Math.sin(angle) * distance
+            );
+
+            // Random movement direction (horizontal only)
+            const randomDir = new THREE.Vector3(
+                (Math.random() - 0.5) * 2,
+                0,
+                (Math.random() - 0.5) * 2
+            ).normalize();
+            
+            boatMesh.userData = { 
+                type: 'boat', 
+                speed: 0.15 + difficulty * 0.05, // Slower movement
+                direction: randomDir,
+                changeDirectionTime: Date.now() + 3000 + Math.random() * 4000
+            };
+            scene.add(boatMesh);
+            boats.push(boatMesh);
 
             // Spawn more boats as difficulty increases
             const baseDelay = 4000;
@@ -377,7 +762,7 @@
             const distance = 25 + Math.random() * 25;
             boatMesh.position.set(
                 Math.cos(angle) * distance,
-                1,
+                0,
                 Math.sin(angle) * distance
             );
 
@@ -390,7 +775,7 @@
             
             boatMesh.userData = { 
                 type: 'boat', 
-                speed: 0.3 + difficulty * 0.1,
+                speed: 0.15 + difficulty * 0.05, // Slower movement
                 direction: randomDir,
                 changeDirectionTime: Date.now() + 3000 + Math.random() * 4000
             };
@@ -412,20 +797,19 @@
 
             shark.position.x += moveX;
             shark.position.z += moveZ;
+            shark.position.y = 0; // Lock shark to same surface
 
-            // Keep shark in bounds
-            shark.position.x = Math.max(-30, Math.min(30, shark.position.x));
-            shark.position.z = Math.max(-30, Math.min(30, shark.position.z));
+            // No boundaries - shark can move anywhere
 
-            // Rotate shark based on movement
+            // Rotate shark based on movement (for top-down view)
             if (moveX !== 0 || moveZ !== 0) {
-                shark.rotation.y = Math.atan2(moveX, moveZ);
+                shark.rotation.z = Math.atan2(moveX, moveZ);
             }
 
-            // Update camera to follow shark
+            // Update camera to follow shark (top down view)
             camera.position.x = shark.position.x;
-            camera.position.y = shark.position.y + 8;
-            camera.position.z = shark.position.z + 20;
+            camera.position.y = 30; // Keep camera above
+            camera.position.z = shark.position.z;
             camera.lookAt(shark.position);
         }
 
@@ -439,35 +823,28 @@
                 if (Date.now() > f.userData.changeDirectionTime) {
                     f.userData.direction = new THREE.Vector3(
                         (Math.random() - 0.5) * 2,
-                        (Math.random() - 0.5) * 0.5,
+                        0,
                         (Math.random() - 0.5) * 2
                     ).normalize();
                     f.userData.changeDirectionTime = Date.now() + 2000 + Math.random() * 3000;
                 }
                 
-                // Move fish in random direction
-                const moveVector = f.userData.direction.clone().multiplyScalar(f.userData.speed * 0.1);
+                // Move fish in random direction (no boundaries)
+                const moveVector = f.userData.direction.clone().multiplyScalar(f.userData.speed * 0.05);
                 f.position.add(moveVector);
-                
-                // Keep fish in reasonable bounds
-                if (Math.abs(f.position.x) > 50 || Math.abs(f.position.z) > 50) {
-                    // Reverse direction if too far
-                    f.userData.direction.multiplyScalar(-1);
-                }
+                f.position.y = 0; // Lock fish to same surface
 
-                // Check collision with shark
+                // Check collision with shark (bigger fish = bigger collision radius)
                 const distance = f.position.distanceTo(shark.position);
-                if (distance < 2.5) {
+                if (distance < 4.0) {
                     // Fish eaten!
                     scene.remove(f);
                     fish.splice(i, 1);
                     score++;
                     updateScore();
-                } else if (f.position.distanceTo(shark.position) > 100) {
-                    // Remove fish that's too far
-                    scene.remove(f);
-                    fish.splice(i, 1);
+                    playEatSound(); // Play eat sound effect
                 }
+                // No boundaries - fish can move freely
             }
         }
 
@@ -490,6 +867,7 @@
                 // Move boat in random direction
                 const moveVector = b.userData.direction.clone().multiplyScalar(b.userData.speed * 0.1);
                 b.position.add(moveVector);
+                b.position.y = 0.4; // Keep boat slightly above surface
                 
                 // Keep boats in reasonable bounds
                 if (Math.abs(b.position.x) > 50 || Math.abs(b.position.z) > 50) {
@@ -501,6 +879,7 @@
                 const distance = b.position.distanceTo(shark.position);
                 if (distance < 4.0) {
                     // Hit by boat!
+                    playHitSound(); // Play hit sound effect
                     endGame();
                 } else if (b.position.distanceTo(shark.position) > 100) {
                     // Remove boat that's too far
@@ -513,11 +892,17 @@
         function updateDifficulty() {
             const elapsed = (Date.now() - gameStartTime) / 1000;
             difficulty = Math.floor(elapsed / 10) + 1;
-            document.getElementById('difficulty').textContent = `Difficulty: ${difficulty}`;
+            document.getElementById('difficulty').textContent = difficulty;
         }
 
         function updateScore() {
-            document.getElementById('score').textContent = score;
+            const scoreElement = document.getElementById('score');
+            scoreElement.textContent = score;
+            // Add pulse animation when score updates
+            scoreElement.style.animation = 'none';
+            setTimeout(() => {
+                scoreElement.style.animation = 'scorePulse 0.5s ease-in-out';
+            }, 10);
         }
 
         function endGame() {
@@ -561,21 +946,19 @@
             updateBoats();
             updateDifficulty();
 
-            // Animate fish swimming motion
+            // Animate fish swimming motion (rotation only, no vertical movement)
             fish.forEach(f => {
-                f.rotation.y += 0.05;
-                // Slight bobbing motion
-                f.position.y += Math.sin(Date.now() * 0.005 + f.position.x) * 0.01;
+                f.rotation.z += 0.05; // Rotate around Z for top-down view
+                f.position.y = 0; // Keep locked to surface
             });
             
-            // Animate boats bobbing on water
+            // Animate boats (rotation only, no vertical movement)
             boats.forEach(b => {
-                // Rotate boat to face movement direction
+                // Rotate boat to face movement direction (for top-down view)
                 if (b.userData.direction) {
                     b.rotation.y = Math.atan2(b.userData.direction.x, b.userData.direction.z);
                 }
-                // Bobbing motion
-                b.position.y = 1 + Math.sin(Date.now() * 0.003 + b.position.x) * 0.1;
+                b.position.y = 0; // Keep locked to surface
             });
 
             renderer.render(scene, camera);
