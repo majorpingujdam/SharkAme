@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shark Fish Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            color: white;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #score {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 200;
+            display: none;
+            color: white;
+            border: 3px solid #ffd700;
+        }
+
+        #gameOver h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+
+        #finalScore {
+            font-size: 36px;
+            margin: 20px 0;
+            color: #4ade80;
+        }
+
+        #restartBtn {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 20px;
+            background: #4ade80;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #restartBtn:hover {
+            background: #22c55e;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            z-index: 100;
+            font-size: 16px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #difficulty {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="ui">
+            <div>Score: <span id="score">0</span></div>
+            <div id="difficulty">Difficulty: 1</div>
+        </div>
+        <div id="instructions">
+            Use ARROW KEYS or WASD to move the shark<br>
+            Eat fish (🐟) to score points | Avoid boats (🚤) or game over!
+        </div>
+        <div id="gameOver">
+            <h1>Game Over!</h1>
+            <div>Final Score</div>
+            <div id="finalScore">0</div>
+            <button id="restartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Game state
+        let scene, camera, renderer, shark, controls;
+        let fish = [];
+        let boats = [];
+        let score = 0;
+        let gameOver = false;
+        let difficulty = 1;
+        let gameStartTime = Date.now();
+        let keys = {};
+
+        // Initialize game
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1e3c72);
+            scene.fog = new THREE.Fog(0x1e3c72, 10, 100);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('gameContainer').appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+
+            // Water plane
+            const waterGeometry = new THREE.PlaneGeometry(200, 200);
+            const waterMaterial = new THREE.MeshStandardMaterial({
+                color: 0x2a5298,
+                transparent: true,
+                opacity: 0.8
+            });
+            const water = new THREE.Mesh(waterGeometry, waterMaterial);
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = -2;
+            scene.add(water);
+
+            // Load shark model
+            const loader = new GLTFLoader();
+            loader.load('./3d model/shark.glb', (gltf) => {
+                shark = gltf.scene;
+                shark.scale.set(2.0, 2.0, 2.0);
+                shark.position.set(0, 0, 0);
+                scene.add(shark);
+
+                // Start game
+                animate();
+                spawnFish();
+                spawnBoat();
+            }, undefined, (error) => {
+                console.error('Error loading shark model:', error);
+                // Create a simple shark if model fails to load
+                createSimpleShark();
+                animate();
+                spawnFish();
+                spawnBoat();
+            });
+
+            // Keyboard controls
+            window.addEventListener('keydown', (e) => {
+                keys[e.key.toLowerCase()] = true;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                keys[e.key.toLowerCase()] = false;
+            });
+
+            // Window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // Restart button
+            document.getElementById('restartBtn').addEventListener('click', restartGame);
+        }
+
+        function createSimpleShark() {
+            const sharkGeometry = new THREE.ConeGeometry(2, 6, 8);
+            const sharkMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
+            shark = new THREE.Mesh(sharkGeometry, sharkMaterial);
+            shark.rotation.z = Math.PI / 2;
+            shark.scale.set(2.0, 2.0, 2.0);
+            scene.add(shark);
+        }
+
+        function spawnFish() {
+            if (gameOver) return;
+
+            const fishGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+            const fishMaterial = new THREE.MeshStandardMaterial({ color: 0xffd700 });
+            const fishMesh = new THREE.Mesh(fishGeometry, fishMaterial);
+            
+            // Random position around the shark
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 20 + Math.random() * 30;
+            fishMesh.position.set(
+                Math.cos(angle) * distance,
+                (Math.random() - 0.5) * 10,
+                Math.sin(angle) * distance
+            );
+
+            fishMesh.userData = { type: 'fish', speed: 0.5 + Math.random() * 0.5 };
+            scene.add(fishMesh);
+            fish.push(fishMesh);
+
+            // Spawn next fish
+            const spawnDelay = Math.max(1000 - difficulty * 50, 300);
+            setTimeout(spawnFish, spawnDelay);
+        }
+
+        function spawnBoat() {
+            if (gameOver) return;
+
+            const boatGeometry = new THREE.BoxGeometry(2, 0.5, 1);
+            const boatMaterial = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            const boatMesh = new THREE.Mesh(boatGeometry, boatMaterial);
+            
+            // Random position
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 25 + Math.random() * 25;
+            boatMesh.position.set(
+                Math.cos(angle) * distance,
+                1,
+                Math.sin(angle) * distance
+            );
+
+            boatMesh.userData = { type: 'boat', speed: 0.3 + difficulty * 0.1 };
+            scene.add(boatMesh);
+            boats.push(boatMesh);
+
+            // Spawn next boat
+            const spawnDelay = Math.max(3000 - difficulty * 100, 1500);
+            setTimeout(spawnBoat, spawnDelay);
+        }
+
+        function updateShark() {
+            if (!shark || gameOver) return;
+
+            const speed = 0.3;
+            let moveX = 0;
+            let moveZ = 0;
+
+            if (keys['arrowleft'] || keys['a']) moveX = -speed;
+            if (keys['arrowright'] || keys['d']) moveX = speed;
+            if (keys['arrowup'] || keys['w']) moveZ = -speed;
+            if (keys['arrowdown'] || keys['s']) moveZ = speed;
+
+            shark.position.x += moveX;
+            shark.position.z += moveZ;
+
+            // Keep shark in bounds
+            shark.position.x = Math.max(-30, Math.min(30, shark.position.x));
+            shark.position.z = Math.max(-30, Math.min(30, shark.position.z));
+
+            // Rotate shark based on movement
+            if (moveX !== 0 || moveZ !== 0) {
+                shark.rotation.y = Math.atan2(moveX, moveZ);
+            }
+
+            // Update camera to follow shark
+            camera.position.x = shark.position.x;
+            camera.position.z = shark.position.z + 15;
+            camera.lookAt(shark.position);
+        }
+
+        function updateFish() {
+            if (!shark) return;
+
+            for (let i = fish.length - 1; i >= 0; i--) {
+                const f = fish[i];
+                
+                // Move fish towards shark
+                const direction = new THREE.Vector3();
+                direction.subVectors(shark.position, f.position).normalize();
+                f.position.add(direction.multiplyScalar(f.userData.speed * 0.1));
+
+                // Check collision with shark
+                const distance = f.position.distanceTo(shark.position);
+                if (distance < 1.5) {
+                    // Fish eaten!
+                    scene.remove(f);
+                    fish.splice(i, 1);
+                    score++;
+                    updateScore();
+                } else if (f.position.distanceTo(shark.position) > 100) {
+                    // Remove fish that's too far
+                    scene.remove(f);
+                    fish.splice(i, 1);
+                }
+            }
+        }
+
+        function updateBoats() {
+            if (!shark) return;
+
+            for (let i = boats.length - 1; i >= 0; i--) {
+                const b = boats[i];
+                
+                // Move boat towards shark
+                const direction = new THREE.Vector3();
+                direction.subVectors(shark.position, b.position).normalize();
+                b.position.add(direction.multiplyScalar(b.userData.speed * 0.1));
+
+                // Check collision with shark
+                const distance = b.position.distanceTo(shark.position);
+                if (distance < 2.5) {
+                    // Hit by boat!
+                    endGame();
+                } else if (b.position.distanceTo(shark.position) > 100) {
+                    // Remove boat that's too far
+                    scene.remove(b);
+                    boats.splice(i, 1);
+                }
+            }
+        }
+
+        function updateDifficulty() {
+            const elapsed = (Date.now() - gameStartTime) / 1000;
+            difficulty = Math.floor(elapsed / 10) + 1;
+            document.getElementById('difficulty').textContent = `Difficulty: ${difficulty}`;
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function endGame() {
+            gameOver = true;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        function restartGame() {
+            // Clear all objects
+            fish.forEach(f => scene.remove(f));
+            boats.forEach(b => scene.remove(b));
+            fish = [];
+            boats = [];
+
+            // Reset game state
+            score = 0;
+            gameOver = false;
+            difficulty = 1;
+            gameStartTime = Date.now();
+            updateScore();
+            document.getElementById('gameOver').style.display = 'none';
+
+            // Reset shark position
+            if (shark) {
+                shark.position.set(0, 0, 0);
+            }
+
+            // Restart spawning
+            spawnFish();
+            spawnBoat();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (gameOver) return;
+
+            updateShark();
+            updateFish();
+            updateBoats();
+            updateDifficulty();
+
+            // Rotate fish for visual effect
+            fish.forEach(f => {
+                f.rotation.y += 0.1;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // Start game
+        init();
+    </script>
+</body>
+</html>
+
