@@ -848,14 +848,13 @@
             
             const boatMesh = boatGroup;
             boatMesh.rotation.x = -Math.PI / 2; // Rotate for top-down view
-            boatMesh.scale.set(0.8, 0.8, 0.8); // Ship size
             
-            // Random position (slightly above surface, far from shark)
+            // Random position (same Y level as everything else)
             const angle = Math.random() * Math.PI * 2;
-            const distance = 40 + Math.random() * 30; // Spawn further away from shark
+            const distance = 25 + Math.random() * 25;
             boatMesh.position.set(
                 Math.cos(angle) * distance,
-                0.4, // Move ship up a bit
+                0,
                 Math.sin(angle) * distance
             );
 
@@ -1017,7 +1016,7 @@
                 // Move boat in random direction
                 const moveVector = b.userData.direction.clone().multiplyScalar(b.userData.speed * 0.1);
                 b.position.add(moveVector);
-                b.position.y = 0.4; // Keep boat slightly above surface
+                b.position.y = 0; // Lock boat to same surface
                 
                 // Keep boats in reasonable bounds
                 if (Math.abs(b.position.x) > 50 || Math.abs(b.position.z) > 50) {
