@@ -260,6 +260,69 @@
             font-size: 18px;
             color: #ff6b6b;
         }
+
+        #mobileControls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 150;
+            display: none; /* Hidden by default, shown on mobile */
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 8px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            border: 3px solid rgba(255, 215, 0, 0.6);
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.9) 0%, rgba(42, 82, 152, 0.9) 100%);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.4),
+                0 0 15px rgba(255, 215, 0, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease;
+            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+        }
+
+        .control-btn:active,
+        .control-btn.active {
+            transform: scale(0.9);
+            background: linear-gradient(135deg, rgba(42, 82, 152, 0.9) 0%, rgba(30, 60, 114, 0.9) 100%);
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(255, 215, 0, 0.5),
+                inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn.empty {
+            visibility: hidden;
+        }
+
+        @media (max-width: 768px) {
+            #mobileControls {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
@@ -278,6 +341,19 @@
         <div id="instructions">
             Use ARROW KEYS or WASD to move the shark<br>
             Eat fish (🐟) to score points | Avoid boats (🚤) or game over!
+        </div>
+        <div id="mobileControls">
+            <div class="control-grid">
+                <div class="control-btn empty"></div>
+                <div class="control-btn" id="btnUp" data-key="w">W</div>
+                <div class="control-btn empty"></div>
+                <div class="control-btn" id="btnLeft" data-key="a">A</div>
+                <div class="control-btn empty"></div>
+                <div class="control-btn" id="btnRight" data-key="d">D</div>
+                <div class="control-btn empty"></div>
+                <div class="control-btn" id="btnDown" data-key="s">S</div>
+                <div class="control-btn empty"></div>
+            </div>
         </div>
         <div id="gameOver">
             <h1>Game Over!</h1>
@@ -470,6 +546,56 @@
             window.addEventListener('keyup', (e) => {
                 keys[e.key.toLowerCase()] = false;
             });
+
+            // Mobile touch controls
+            const controlButtons = document.querySelectorAll('.control-btn:not(.empty)');
+            controlButtons.forEach(btn => {
+                const key = btn.getAttribute('data-key');
+                
+                // Touch start
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    keys[key] = true;
+                    btn.classList.add('active');
+                });
+                
+                // Touch end
+                btn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                    btn.classList.remove('active');
+                });
+                
+                // Touch cancel (when touch moves outside button)
+                btn.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                    btn.classList.remove('active');
+                });
+                
+                // Mouse events for desktop testing
+                btn.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    keys[key] = true;
+                    btn.classList.add('active');
+                });
+                
+                btn.addEventListener('mouseup', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                    btn.classList.remove('active');
+                });
+                
+                btn.addEventListener('mouseleave', (e) => {
+                    keys[key] = false;
+                    btn.classList.remove('active');
+                });
+            });
+
+            // Show mobile controls on touch devices
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                document.getElementById('mobileControls').style.display = 'block';
+            }
 
             // Window resize
             window.addEventListener('resize', () => {
